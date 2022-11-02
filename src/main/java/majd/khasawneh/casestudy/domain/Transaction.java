@@ -16,6 +16,21 @@ public class Transaction {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
+    @Column(name = "type", nullable = false)
+    private TransactionType type;
+
+    public Transaction() {
+    }
+
+    public Transaction(Double amount, LocalDate date, TransactionType type) {
+        this.amount = amount;
+        this.date = date;
+        this.type = type;
+    }
+
+    @ManyToOne
+    private Customer customer;
+
     public Long getId() {
         return id;
     }
@@ -38,5 +53,21 @@ public class Transaction {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 }

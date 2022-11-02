@@ -1,7 +1,10 @@
 package majd.khasawneh.casestudy.domain;
 
+import majd.khasawneh.casestudy.exceptions.CustomerServiceException;
+
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Customer {
@@ -17,7 +20,29 @@ public class Customer {
     private String email;
 
     @Column(name = "balance", nullable = false)
-    private Double balance;
+    private Double balance = 0D;
+
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<Transaction> transactions = new HashSet<>();
+
+    public void addTransaction(Transaction transaction) {
+        if (transaction.getType().equals(TransactionType.DEPOSIT)) {
+            transactions.add(transaction);
+            this.balance = this.balance + transaction.getAmount();
+            transaction.setCustomer(this);
+        } else if (transaction.getType().equals(TransactionType.WITHDRAW)) {
+            if (this.balance - transaction.getAmount() < 0)
+                throw new CustomerServiceException("not enough balance");
+
+            transactions.add(transaction);
+            this.balance = this.balance - transaction.getAmount();
+            transaction.setCustomer(this);
+        }
+    }
 
     public Long getId() {
         return id;
@@ -50,4 +75,13 @@ public class Customer {
     public void setBalance(Double balance) {
         this.balance = balance;
     }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
 }
